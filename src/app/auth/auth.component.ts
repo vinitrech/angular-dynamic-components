@@ -1,23 +1,52 @@
-import {Component} from "@angular/core";
+import {
+    Component,
+    ComponentFactoryResolver,
+    createComponent,
+    OnDestroy,
+    ViewChild,
+    ViewContainerRef
+} from "@angular/core";
 import {NgForm} from "@angular/forms";
 import {AuthResponseData, AuthService} from "./auth.service";
-import {Observable} from "rxjs";
+import {Observable, Subscription} from "rxjs";
 import {Router} from "@angular/router";
+import {AlertComponent} from "../shared/alert/alert.component";
+import {PlaceholderDirective} from "../shared/placeholder/placeholder.directive";
 
 @Component({
     selector: 'app-auth',
     templateUrl: 'auth.component.html'
 })
-export class AuthComponent {
+export class AuthComponent implements OnDestroy {
     isLoginMode: boolean = true;
     isLoading: boolean = false;
-    error: string = '';
+    @ViewChild(PlaceholderDirective) alertPlaceholder !: PlaceholderDirective; // ViewChild will search for the first occurrence of the informed type
+    alertCloseSubscription: Subscription = new Subscription();
+
+    // error: string = '';
 
     constructor(private authService: AuthService, private router: Router) {
     }
 
-    closeModal() {
-        this.error = '';
+    ngOnDestroy(): void {
+        if (this.alertCloseSubscription) {
+            this.alertCloseSubscription.unsubscribe();
+        }
+    }
+
+    // closeModal() {
+    //     this.error = '';
+    // }
+
+    private showErrorAlert(message: string) {
+        this.alertPlaceholder.viewContainerRef.clear();
+        const alertComponent = this.alertPlaceholder.viewContainerRef.createComponent<AlertComponent>(AlertComponent);
+
+        alertComponent.instance.message = message;
+        this.alertCloseSubscription = alertComponent.instance.close.subscribe(() => {
+            this.alertCloseSubscription.unsubscribe();
+            this.alertPlaceholder.viewContainerRef.clear();
+        });
     }
 
     onSwitchMode() {
@@ -33,7 +62,7 @@ export class AuthComponent {
         const password = formValue.value.password;
 
         this.isLoading = true;
-        this.error = '';
+        // this.error = '';
 
         let authObservable: Observable<AuthResponseData>;
 
@@ -50,7 +79,8 @@ export class AuthComponent {
                 this.router.navigate(['/recipes']);
             },
             error: (errorMessage) => {
-                this.error = errorMessage
+                // this.error = errorMessage
+                this.showErrorAlert(errorMessage);
                 this.isLoading = false;
             }
         })

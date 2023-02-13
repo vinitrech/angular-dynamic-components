@@ -3,9 +3,10 @@
         <!--    <div class="alert alert-danger" *ngIf="error.length > 0">-->
         <!--      {{error}}-->
         <!--    </div>-->
-        <app-alert (close)="closeModal()" [message]="error" *ngIf="error.length > 0">
+        <!--        <app-alert (close)="closeModal()" [message]="error" *ngIf="error.length > 0">-->
 
-        </app-alert>
+        <!--        </app-alert>-->
+        <ng-template appPlaceholder></ng-template>
         <div *ngIf="isLoading" class="text-center">
             <app-loading-spinner></app-loading-spinner>
         </div>
